@@ -1,10 +1,11 @@
 set(HEADER_DIR ${LIBW3D_ROOT}/include/libw3d)
-set(PUBLIC_HEADERS  ${HEADER_DIR}/w3d.hpp)
 
 file(GLOB_RECURSE SRC_FILES
     "*.hpp"
     "*.cpp"
 )
+
+file(GLOB_RECURSE PUBLIC_HEADERS "../include/libw3d/*.hpp")
 
 add_library(libw3d STATIC   ${SRC_FILES}
 							${PUBLIC_HEADERS})
