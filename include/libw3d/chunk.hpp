@@ -171,8 +171,7 @@ namespace libw3d
 			SOUNDROBJ_DEFINITION,                              // chunk containing the definition of the sound that is to play
 		};
 
-		Type ChunkType;
-
+	public:
 		virtual void Load(std::ifstream& fin, uint32_t chunksize);
 	};
 }

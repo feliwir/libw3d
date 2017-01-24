@@ -7,7 +7,7 @@ using namespace libw3d;
 Model Loader::FromFile(const std::string& filename)
 {
 	Model m;
-	std::ifstream fin(filename);
+	std::ifstream fin(filename,std::ios::binary);
 	if (fin.fail())
 		return m;
 	
@@ -26,10 +26,10 @@ Model Loader::FromFile(const std::string& filename)
 std::shared_ptr<Chunk> Loader::ReadChunk(std::ifstream& fin)
 {
 	std::shared_ptr<Chunk> chunk;
-
-	Chunk::Type type =  read<Chunk::Type>(fin);
-	//ignore the first bit for the chunksize
-	uint32_t size = read<uint32_t>(fin) & 0x7FFFFFFF;
+	Chunk::Type type =  static_cast<Chunk::Type>(read<uint32_t>(fin));
+	uint32_t info = read<uint32_t>(fin);
+	bool subChunks = (info >> 31);
+	uint32_t size = info & 0x7FFFFFFF;
 	uint32_t end = static_cast<uint32_t>(fin.tellg()) + size;
 	
 	switch (type)
@@ -42,7 +42,7 @@ std::shared_ptr<Chunk> Loader::ReadChunk(std::ifstream& fin)
 		chunk = std::make_shared<Chunk>();
 	}
 
-	chunk->ChunkType = type;
 	chunk->Load(fin, size);
+		
 	return chunk;
 }

@@ -9,7 +9,7 @@ namespace libw3d
 	{
 	public:
 		static Model FromFile(const std::string& filename);
+	private:
 		static std::shared_ptr<Chunk> ReadChunk(std::ifstream& fin);
 	};
-
 }
