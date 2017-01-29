@@ -12,6 +12,7 @@ std::string Viewer::s_vertSrc =
 "layout (location=4)in uint boneId2;\n"
 "uniform mat4 mvp;\n"
 "out vec4 fnormal;\n"
+"out vec2 ftxcoord;\n"
 "void main()\n"
 "{\n"
 "	gl_Position = mvp*vec4(pos,1);\n"
@@ -20,20 +21,26 @@ std::string Viewer::s_vertSrc =
 std::string Viewer::s_fragSrc =
 "#version 330\n"
 "in vec4 fnormal;\n"
+"in vec2 ftxcoord;\n"
+"uniform bool has_diffuse;\n"
+"uniform sampler2D diffuse;\n"
 "out vec4 color;\n"
 "void main()\n"
 "{\n"
-"	color = vec4(1,0,0,1);\n"
+"	if(has_diffuse)\n"
+"		color = texture(diffuse,ftxcoord);\n"
+"	else\n"
+"		color = vec4(1.0,0,1.0,1.0);\n"
 "}";
 
 
 void APIENTRY Viewer::Callback(GLenum source, GLenum type, GLuint id,
-	GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	GLenum severity, GLsizei length, const char* message, const void* userParam)
 {
 	std::cout << message << std::endl;
 }
 
-Viewer::Viewer() : m_width(800),m_height(600), m_vao(0)
+Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3(0,0,1))
 {
 	glfwSetErrorCallback(Error);
 	if (glfwInit() == GLFW_FALSE)
@@ -48,12 +55,14 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0)
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	#endif	
 
-	m_window = glfwCreateWindow(m_width, m_height, "Apt player", NULL, NULL);
+	m_window = glfwCreateWindow(m_width, m_height, "W3d viewer", NULL, NULL);
 	if (m_window == NULL)
 		exit(EXIT_FAILURE);
 
 	glfwSetWindowSizeCallback(m_window, Resize);
-	glfwSetCursorPosCallback(m_window, CursorMove);
+	glfwSetCursorPosCallback(m_window, MouseMove);
+	glfwSetScrollCallback(m_window, MouseScroll);
+	glfwSetMouseButtonCallback(m_window, MouseButton);
 	glfwSetWindowUserPointer(m_window, this);
 	glfwMakeContextCurrent(m_window);
 	glfwSwapInterval(0);
@@ -66,22 +75,18 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0)
 		glDebugMessageCallback(Viewer::Callback, nullptr);
 		#endif
 	}
+	glViewport(0, 0, m_width, m_height);
 	m_shader.Load(s_vertSrc, s_fragSrc);
 	m_shader.addUniform("mvp");
+	m_shader.addUniform("has_diffuse");
+	m_shader.addUniform("diffuse");
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
-	m_view = glm::lookAt(
-		glm::vec3(0, 0, -100),
-		glm::vec3(0, 0, 0),
-		glm::vec3(0, 1, 0)
-	);
 	
 	float ratio = m_width / (float)m_height;
 	m_projection = glm::perspective(glm::radians(45.0f), 
-		ratio, 0.0f, 1000.0f);
-
-	m_mvp = m_view*m_projection;
+		ratio, 1.0f, 1000.0f);
 }
 
 Viewer::~Viewer()
@@ -102,11 +107,12 @@ void Viewer::Run()
 
 	while (!glfwWindowShouldClose(m_window))
 	{
+		m_mvp = m_projection*m_arcball.GetViewMatrix();
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		m_shader.Use();
 		glUniformMatrix4fv(m_shader.uniform("mvp"), 1, false, glm::value_ptr(m_mvp));
 		
-		m_model.Render();
+		m_model.Render(m_shader);
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();
 	}
@@ -141,7 +147,26 @@ void Viewer::Resize(GLFWwindow* win, int width, int height)
 
 }
 
-void Viewer::CursorMove(GLFWwindow * window, double xpos, double ypos)
+void Viewer::MouseMove(GLFWwindow * window, double xpos, double ypos)
 {
+	Viewer* v = reinterpret_cast<Viewer*>(glfwGetWindowUserPointer(window));
+	v->GetArcball().Move(xpos, ypos);
+}
 
+void Viewer::MouseScroll(GLFWwindow * window, double xoffset, double yoffset)
+{
+	Viewer* v = reinterpret_cast<Viewer*>(glfwGetWindowUserPointer(window));
+	v->GetArcball().Distance(-5*yoffset);
+}
+
+void Viewer::MouseButton(GLFWwindow* window, int button, int action, int mods)
+{
+	Viewer* v = reinterpret_cast<Viewer*>(glfwGetWindowUserPointer(window));
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		if (action == GLFW_PRESS)
+			v->GetArcball().SetDown(true);
+		else if(action == GLFW_RELEASE)
+			v->GetArcball().SetDown(false);
+	}
 }

@@ -1,4 +1,6 @@
-#include "model.hpp"()
+#include "model.hpp"
+
+std::map<std::string, std::shared_ptr<Texture>> CompiledModel::s_textures;
 
 CompiledModel::CompiledModel()
 {
@@ -19,7 +21,9 @@ void CompiledModel::Create(libw3d::Model& m)
 	//compile all meshes
 	for (auto& mesh : m.Meshes)
 	{
+		Mesh compiled;
 		std::vector<Vertex> verts;
+
 		for (auto& vert : mesh->Vertices)
 		{
 			Vertex v;
@@ -27,17 +31,41 @@ void CompiledModel::Create(libw3d::Model& m)
 			verts.push_back(v);
 		}
 
-		for (int i = 0; i < mesh->Normals.size(); ++i)
+		for (unsigned int i = 0; i < mesh->Normals.size(); ++i)
 		{
 			auto& normal = mesh->Normals[i];
 			verts[i].normal = glm::vec3(normal.X, normal.Y, normal.Z);
 		}
 
-		for (int i = 0; i < mesh->VertexInfluences.size(); ++i)
+		for (unsigned int i = 0; i < mesh->VertexInfluences.size(); ++i)
 		{
 			auto& infl = mesh->VertexInfluences[i];
 			verts[i].boneId = infl.Bone;
 			verts[i].boneId2 = infl.Bone2;
+		}
+
+		if (mesh->MatPass)
+		{
+			for (unsigned int i=0;i< mesh->MatPass->Texcoords.size();++i)
+			{
+				auto& tx = mesh->MatPass->Texcoords[i];
+				verts[i].txcoord = glm::vec2(tx.x,tx.y);
+			}
+		}
+
+		if (mesh->TextureMaps)
+		{
+			for (auto& tex : mesh->TextureMaps->TextureMaps)
+			{
+				auto handle = std::make_shared<Texture>();
+				if (!handle->Load(tex->Entry.ItemName))
+					continue;
+
+				if (std::string(tex->Entry.InfoName) == "DiffuseTexture")
+				{
+					compiled.diffuse = handle;
+				}
+			}
 		}
 
 		std::vector<glm::uint16_t> indices;
@@ -48,8 +76,9 @@ void CompiledModel::Create(libw3d::Model& m)
 			indices.push_back(tri.Indices[2]);
 		}
 
+
 		//compile that shit
-		Mesh compiled;
+
 		glGenBuffers(1, &compiled.vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, compiled.vbo);
 		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(Vertex), verts.data(), GL_STATIC_DRAW);
@@ -72,12 +101,21 @@ void CompiledModel::Create(libw3d::Model& m)
 
 }
 
-void CompiledModel::Render()
+void CompiledModel::Render(Shader& s)
 {
+	
 	for (auto& mesh : m_meshes)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER,mesh.vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+		if (mesh.diffuse)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glUniform1i(s.uniform("has_diffuse"), true);
+			glUniform1i(s.uniform("diffuse"), 0);
+			mesh.diffuse->Bind();
+		}
+
 		glDrawElements(GL_TRIANGLES, mesh.num, GL_UNSIGNED_SHORT, nullptr);
 	}
 }

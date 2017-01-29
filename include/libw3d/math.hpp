@@ -8,6 +8,12 @@ namespace libw3d
         float X,Y,Z;
 	};
 
+	class Vector2f
+	{
+	public:
+		float x, y;
+	};
+
 	class Quaternion
 	{
 	public:

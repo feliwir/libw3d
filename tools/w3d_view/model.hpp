@@ -4,7 +4,7 @@
 #include "flextGL.h"
 #include <gl/GL.h>
 #include "shader.hpp"
-
+#include "texture.hpp"
 class CompiledModel
 {
 public:
@@ -24,14 +24,15 @@ public:
 		//indexbuffer
 		GLuint ibo;
 		uint32_t num;
+		std::shared_ptr<Texture> diffuse;
 	};
 public:
 	CompiledModel();
 	~CompiledModel();
 
 	void Create(libw3d::Model& m);
-	void Render();
+	void Render(Shader& s);
 private:
 	std::vector<Mesh> m_meshes;
-
+	static std::map < std::string, std::shared_ptr<Texture>> s_textures;
 };

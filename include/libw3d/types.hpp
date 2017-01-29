@@ -10,6 +10,25 @@
 
 namespace libw3d
 {
+	#pragma pack(push, 1)
+	struct NormMapHeaderStruct
+	{
+		uint8_t		Number;
+		char		TypeName[W3D_TYPE_LEN];
+		uint32_t	Reserved;
+	} ;
+
+	// New entry item structure for BFME2 ....
+	struct NormMapEntryStruct
+	{
+		uint32_t	TypeFlag;
+		uint32_t	TypeSize;
+		char		InfoName[W3D_NAME_LEN-1];
+		uint32_t	ItemSize;
+		char		ItemName[W3D_TYPE_LEN];
+	} ;
+
+
 	struct HierarchyHeader
 	{
 		uint32_t    Version;
@@ -158,10 +177,10 @@ namespace libw3d
 		STAGE_TEXCOORDS = 0x0000004A,       // per-vertex texture coordinates (array of W3dTexCoordStruct's)
 		PER_FACE_TEXCOORD_IDS = 0x0000004B, // indices to STAGE_TEXCOORDS, (array of Vector3i)
 
-		NORMALMAP_INFO = 0x00000050,  // material/texture 1st marker flag for BFME2 (???)
-		NORMALMAP_FLAG1 = 0x00000051, // material/texture 2nd marker flag for BFME2 (???)
-		NORMALMAP_FLAG2 = 0x00000052, // material/texture structure  of W3dNormMapHeaderStruct for BFME2
-		NORMALMAP_FLAG3 = 0x00000053, // array of texture structures of W3dNormMapEntryStruct for BFME2
+		NORMALMAP_INFO = 0x00000050,  // texture array for BFME2 (???)
+		NORMALMAP_ENTRY = 0x00000051, // texture entry for BFME2 (???)
+		NORMALMAP_HEADER = 0x00000052, // material/texture structure  of W3dNormMapHeaderStruct for BFME2
+		NORMALMAP_CONTENT = 0x00000053, // array of texture structures of W3dNormMapEntryStruct for BFME2
 
 		DEFORM = 0x00000058,          // mesh deform or 'damage' information.
 		DEFORM_SET = 0x00000059,      // set of deform information
@@ -269,4 +288,5 @@ namespace libw3d
 		SOUNDROBJ_HEADER,       // general information such as name and version
 		SOUNDROBJ_DEFINITION,   // chunk containing the definition of the sound that is to play
 	};
+	#pragma pack(pop)
 }

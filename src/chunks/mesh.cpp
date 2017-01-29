@@ -30,6 +30,14 @@ void Mesh::Load(std::ifstream & fin, uint32_t chunksize)
 		case VERTEX_INFLUENCES:
 			VertexInfluences = readArray<Influence>(fin, subend);
 			break;
+		case NORMALMAP_INFO:
+			TextureMaps = std::make_shared<NormalmapArray>();
+			TextureMaps->Load(fin,size);
+			break;
+		case MATERIAL_PASS:
+			MatPass = std::make_shared<MaterialPass>();
+			MatPass->Load(fin, size);
+			break;
 		case VERTEX_SHADE_INDICES:
 			ShadeIndices = readArray<uint32_t>(fin, subend);
 			break;
