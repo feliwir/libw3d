@@ -11,12 +11,15 @@ std::string Viewer::s_vertSrc =
 "layout (location=3)in uint boneId1;\n"
 "layout (location=4)in uint boneId2;\n"
 "uniform mat4 mvp;\n"
+"out vec4 fnormal;\n"
 "void main()\n"
 "{\n"
 "	gl_Position = mvp*vec4(pos,1);\n"
+"   fnormal = vec4(normal,0);\n"
 "}";
 std::string Viewer::s_fragSrc =
 "#version 330\n"
+"in vec4 fnormal;\n"
 "out vec4 color;\n"
 "void main()\n"
 "{\n"
@@ -69,13 +72,14 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0)
 	glBindVertexArray(m_vao);
 
 	m_view = glm::lookAt(
-		glm::vec3(10, 0, 0),
+		glm::vec3(0, 0, -100),
 		glm::vec3(0, 0, 0),
 		glm::vec3(0, 1, 0)
 	);
-
+	
+	float ratio = m_width / (float)m_height;
 	m_projection = glm::perspective(glm::radians(45.0f), 
-		m_width / (float)m_height, 1.0f, 100.0f);
+		ratio, 0.0f, 1000.0f);
 
 	m_mvp = m_view*m_projection;
 }
