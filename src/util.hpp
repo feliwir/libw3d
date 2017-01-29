@@ -25,4 +25,16 @@ namespace libw3d
 
 		return result;
 	}
+
+	template <typename T>
+	static inline std::vector<T> readArrayByNum(std::ifstream& fin, uint32_t numElements)
+	{
+		std::vector<T> result;
+		for(int i=0;i<numElements;++i)
+		{
+			result.push_back(read<T>(fin));
+		}
+
+		return result;
+	}
 }

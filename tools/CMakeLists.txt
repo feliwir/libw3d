@@ -1,1 +1,2 @@
 add_subdirectory(w3d_util)
+add_subdirectory(w3d_view)
