@@ -5,6 +5,7 @@
 #include "../math.hpp"
 #include "material.hpp"
 #include "normalmap.hpp"
+#include "texture.hpp"
 
 namespace libw3d
 {
@@ -22,5 +23,6 @@ namespace libw3d
 		MaterialInfo					MatInfo;
 		std::shared_ptr<MaterialPass>	MatPass;
 		std::shared_ptr<NormalmapArray>	TextureMaps;
+		std::shared_ptr<TextureArray>	Textures;
 	};
 }

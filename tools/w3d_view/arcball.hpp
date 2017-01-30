@@ -13,7 +13,7 @@ public:
 
 	inline void Recalculate()
 	{
-		m_view = glm::lookAt(m_center + m_dir*m_distance, m_center, glm::vec3(0, 1, 0));
+		m_view = glm::lookAt(m_center + m_dir*m_distance, m_center, glm::vec3(0, 0, 1));
 	}
 
 	inline void Move(double x, double y)
@@ -24,7 +24,7 @@ public:
 		{
 			glm::vec2 dir = new_mouse - m_mouse;
 
-			m_dir = glm::rotateZ(m_dir, -0.01f*dir.x);
+			m_dir = glm::rotateY(m_dir, -0.01f*dir.x);
 			m_dir = glm::rotateX(m_dir, -0.01f*dir.y);
 			Recalculate();
 		}

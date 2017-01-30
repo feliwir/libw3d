@@ -16,7 +16,7 @@ std::string Viewer::s_vertSrc =
 "out vec2 ftxcoord;\n"
 "void main()\n"
 "{\n"
-"	gl_Position = m*vp*vec4(pos,1);\n"
+"	gl_Position = vp*m*vec4(pos,1);\n"
 "	ftxcoord = txcoord;\n"
 "   fnormal = vec4(normal,0);\n"
 "}";
@@ -42,7 +42,7 @@ void APIENTRY Viewer::Callback(GLenum source, GLenum type, GLuint id,
 	std::cout << message << std::endl;
 }
 
-Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3(0,0,1))
+Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3(1,0,0))
 {
 	glfwSetErrorCallback(Error);
 	if (glfwInit() == GLFW_FALSE)

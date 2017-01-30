@@ -1,6 +1,8 @@
 #include "model.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <stack>
 std::map<std::string, std::shared_ptr<Texture>> CompiledModel::s_textures;
 
 CompiledModel::CompiledModel()
@@ -30,10 +32,8 @@ void CompiledModel::Create(libw3d::Model& m)
 				pivot.EulerAngles.Y, pivot.EulerAngles.Z);
 			p.translate = glm::vec3(pivot.Translation.X,
 				pivot.Translation.Y, pivot.Translation.Z);
-			p.rotation.x = pivot.Rotation.X;
-			p.rotation.y = pivot.Rotation.Y;
-			p.rotation.z = pivot.Rotation.Z;
-			p.rotation.w = pivot.Rotation.W;
+			p.rotation = glm::quat(pivot.Rotation.W, pivot.Rotation.X,
+				pivot.Rotation.Y, pivot.Rotation.Z);
 			m_pivots.push_back(p);
 		}
 	}
@@ -84,7 +84,9 @@ void CompiledModel::Create(libw3d::Model& m)
 						auto handle = std::make_shared<Texture>();
 						if (!handle->Load(entry.ItemName))
 							continue;
-							
+						
+						s_textures[entry.ItemName] = handle;
+
 						if(entry.TypeName=="DiffuseTexture")
 							compiled.diffuse = handle;
 					}
@@ -92,6 +94,19 @@ void CompiledModel::Create(libw3d::Model& m)
 			}
 		}
 
+		if (mesh->Textures)
+		{
+			for (auto& tex : mesh->Textures->Textures)
+			{
+				auto handle = std::make_shared<Texture>();
+				if (!handle->Load(tex->Name))
+					continue;
+
+				s_textures[tex->Name] = handle;
+				if(compiled.diffuse==nullptr)
+					compiled.diffuse = handle;
+			}
+		}
 
 		std::vector<glm::uint16_t> indices;
 		for (auto& tri : mesh->Triangles)
@@ -154,20 +169,31 @@ void CompiledModel::Render(Shader& s)
 			glUniform1i(s.uniform("diffuse"), 0);
 			mesh.diffuse->Bind();
 		}
-
+		else
+		{
+			glUniform1i(s.uniform("has_diffuse"), false);
+		}
 		glm::mat4 model;
 
 		if (mesh.pivot != -1)
 		{
 			int index = mesh.pivot;
-
-			while (index > 0)
+			std::stack<Pivot> m_order;
+			while (index > -1)
 			{
-				auto p = m_pivots[index];				
-				glm::mat4 rotMat = glm::mat4_cast(p.rotation);
-				model *= rotMat;
-				model = glm::translate(model, p.translate);
+				auto p = m_pivots[index];
+				m_order.push(p);
 				index = p.parent;
+			}
+
+			uint32_t size = m_order.size();
+			for (int i = 0; i <size; ++i)
+			{
+				auto& p = m_order.top();
+				
+				model = glm::translate(model, p.translate);
+				model *= glm::mat4_cast(p.rotation);
+				m_order.pop();
 			}
 		}
 
