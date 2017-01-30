@@ -25,12 +25,12 @@ Texture::~Texture()
 
 bool Texture::Load(const std::string& filename)
 {
-	std::string name;
-	std::transform(filename.begin(), filename.end(), name.begin(), ::tolower);
+	std::string name = filename;
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 	m_texture = gli::load(name);
  	if (m_texture.empty())
 	{
-		GLuint format = GL_RGB;
+		GLuint format = GL_BGR;
 		std::ifstream fin(name,std::ios::binary);
 		if (fin.fail())
 		{

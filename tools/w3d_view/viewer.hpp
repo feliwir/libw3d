@@ -43,5 +43,5 @@ private:
 	static std::string s_fragSrc;
 	GLuint m_vao;
 	glm::mat4 m_projection;
-	glm::mat4 m_mvp;
+	glm::mat4 m_vp;
 };

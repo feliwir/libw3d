@@ -64,6 +64,9 @@ void Normalmap::Load(std::ifstream & fin, uint32_t chunksize)
 				case NORMTYPE_COLORS:
 				Entry.ItemColor = read<Vector4f>(fin);
 				break;
+				case NORMTYPE_ALPHA:
+				Entry.ItemAlpha = read<uint8_t>(fin);
+				break;
 			}
 			
 			Entries.push_back(Entry);

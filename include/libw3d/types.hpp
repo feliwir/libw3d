@@ -37,6 +37,7 @@ namespace libw3d
 		std::string			ItemName;
 		float 				ItemScalar;
 		Vector4f			ItemColor;
+		uint8_t				ItemAlpha;
 	} ;
 
 
@@ -63,6 +64,18 @@ namespace libw3d
 		uint32_t LodCount;
 		char     Name[W3D_NAME_LEN];
 		char     HierarchyName[W3D_NAME_LEN];  // name of the hierarchy tree to use (\0 if none)
+	};
+
+	struct HLodArrayHeader
+	{
+		uint32_t	ModelCount;
+		float		MaxScreenSize;  // if model is bigger than this, switch to higher lod.
+	};
+
+	struct HLodSubObject
+	{
+		uint32_t BoneIndex;
+		char     Name[W3D_NAME_LEN * 2];
 	};
 
 	struct MotionChannelHeader
@@ -197,6 +210,9 @@ namespace libw3d
 		DEFORM_SET = 0x00000059,      // set of deform information
 		DEFORM_KEYFRAME = 0x0000005A, // a keyframe of deform information in the set
 		DEFORM_DATA = 0x0000005B,     // deform information about a single vertex
+
+		TANGENTS = 0x00000060,
+		BITANGENTS = 0x00000061,
 
 		PS2_SHADERS = 0x00000080, // Shader info specific to the Playstation 2.
 		AABTREE = 0x00000090,     // Axis-Aligned Box Tree for hierarchical polygon culling

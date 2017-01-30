@@ -10,12 +10,13 @@ std::string Viewer::s_vertSrc =
 "layout (location=2)in vec2 txcoord;\n"
 "layout (location=3)in uint boneId1;\n"
 "layout (location=4)in uint boneId2;\n"
-"uniform mat4 mvp;\n"
+"uniform mat4 vp;\n"
+"uniform mat4 m;\n"
 "out vec4 fnormal;\n"
 "out vec2 ftxcoord;\n"
 "void main()\n"
 "{\n"
-"	gl_Position = mvp*vec4(pos,1);\n"
+"	gl_Position = m*vp*vec4(pos,1);\n"
 "	ftxcoord = txcoord;\n"
 "   fnormal = vec4(normal,0);\n"
 "}";
@@ -78,7 +79,8 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3
 	}
 	glViewport(0, 0, m_width, m_height);
 	m_shader.Load(s_vertSrc, s_fragSrc);
-	m_shader.addUniform("mvp");
+	m_shader.addUniform("m");
+	m_shader.addUniform("vp");
 	m_shader.addUniform("has_diffuse");
 	m_shader.addUniform("diffuse");
 	glGenVertexArrays(1, &m_vao);
@@ -108,10 +110,10 @@ void Viewer::Run()
 
 	while (!glfwWindowShouldClose(m_window))
 	{
-		m_mvp = m_projection*m_arcball.GetViewMatrix();
+		m_vp = m_projection*m_arcball.GetViewMatrix();
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		m_shader.Use();
-		glUniformMatrix4fv(m_shader.uniform("mvp"), 1, false, glm::value_ptr(m_mvp));
+		glUniformMatrix4fv(m_shader.uniform("vp"), 1, false, glm::value_ptr(m_vp));
 		
 		m_model.Render(m_shader);
 		glfwSwapBuffers(m_window);
