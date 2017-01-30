@@ -2,6 +2,7 @@
 #include "targa.hpp"
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 Texture::Texture() : m_texId(0)
 {
@@ -22,13 +23,15 @@ Texture::~Texture()
 	}
 }
 
-bool Texture::Load(const std::string & filename)
+bool Texture::Load(const std::string& filename)
 {
-	m_texture = gli::load(filename);
+	std::string name;
+	std::transform(filename.begin(), filename.end(), name.begin(), ::tolower);
+	m_texture = gli::load(name);
  	if (m_texture.empty())
 	{
 		GLuint format = GL_RGB;
-		std::ifstream fin(filename,std::ios::binary);
+		std::ifstream fin(name,std::ios::binary);
 		if (fin.fail())
 		{
 			std::cout << "Failed to load: " << filename << std::endl;

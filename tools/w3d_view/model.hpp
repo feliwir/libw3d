@@ -2,7 +2,6 @@
 #include <libw3d/w3d.hpp>
 #include <glm/glm.hpp>
 #include "flextGL.h"
-#include <gl/GL.h>
 #include "shader.hpp"
 #include "texture.hpp"
 class CompiledModel

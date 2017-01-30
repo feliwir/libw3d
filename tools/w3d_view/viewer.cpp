@@ -16,6 +16,7 @@ std::string Viewer::s_vertSrc =
 "void main()\n"
 "{\n"
 "	gl_Position = mvp*vec4(pos,1);\n"
+"	ftxcoord = txcoord;\n"
 "   fnormal = vec4(normal,0);\n"
 "}";
 std::string Viewer::s_fragSrc =
@@ -83,7 +84,7 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
-	
+	glEnable(GL_DEPTH_TEST);
 	float ratio = m_width / (float)m_height;
 	m_projection = glm::perspective(glm::radians(45.0f), 
 		ratio, 1.0f, 1000.0f);

@@ -24,7 +24,7 @@ public:
 		{
 			glm::vec2 dir = new_mouse - m_mouse;
 
-			m_dir = glm::rotateY(m_dir, -0.01f*dir.x);
+			m_dir = glm::rotateZ(m_dir, -0.01f*dir.x);
 			m_dir = glm::rotateX(m_dir, -0.01f*dir.y);
 			Recalculate();
 		}

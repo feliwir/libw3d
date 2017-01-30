@@ -12,7 +12,7 @@ namespace libw3d
 		virtual void Load(std::ifstream& fin, uint32_t chunksize) override;
 	public:
 		NormMapHeaderStruct Header;
-		NormMapEntryStruct Entry;
+		std::vector<NormMapEntryStruct> Entries;
 	};
 
 	class NormalmapArray : public Chunk

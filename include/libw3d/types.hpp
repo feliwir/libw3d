@@ -11,6 +11,15 @@
 namespace libw3d
 {
 	#pragma pack(push, 1)
+	enum NormMapHeaderType : uint32_t
+	{
+		NORMTYPE_TEXTURE 	= 1,
+		NORMTYPE_BUMP 		= 2,
+		NORMTYPE_COLORS 	= 5,
+		NORMTYPE_ALPHA 		= 7
+	};
+
+
 	struct NormMapHeaderStruct
 	{
 		uint8_t		Number;
@@ -21,11 +30,13 @@ namespace libw3d
 	// New entry item structure for BFME2 ....
 	struct NormMapEntryStruct
 	{
-		uint32_t	TypeFlag;
-		uint32_t	TypeSize;
-		char		InfoName[W3D_NAME_LEN-1];
-		uint32_t	ItemSize;
-		char		ItemName[W3D_TYPE_LEN];
+		NormMapHeaderType	TypeFlag;
+		uint32_t			TypeSize;
+		std::string			TypeName;
+		uint32_t			ItemSize;
+		std::string			ItemName;
+		float 				ItemScalar;
+		Vector4f			ItemColor;
 	} ;
 
 

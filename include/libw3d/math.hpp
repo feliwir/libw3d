@@ -2,6 +2,12 @@
 
 namespace libw3d
 {
+	class Vector4f
+    {
+	public:
+        float X,Y,Z,W;
+	};
+
     class Vector3f
     {
 	public:

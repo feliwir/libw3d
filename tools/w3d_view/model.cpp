@@ -57,13 +57,17 @@ void CompiledModel::Create(libw3d::Model& m)
 		{
 			for (auto& tex : mesh->TextureMaps->TextureMaps)
 			{
-				auto handle = std::make_shared<Texture>();
-				if (!handle->Load(tex->Entry.ItemName))
-					continue;
-
-				if (std::string(tex->Entry.InfoName) == "DiffuseTexture")
+				for(auto& entry : tex->Entries)
 				{
-					compiled.diffuse = handle;
+					if (entry.TypeFlag == libw3d::NORMTYPE_TEXTURE)
+					{
+						auto handle = std::make_shared<Texture>();
+						if (!handle->Load(entry.ItemName))
+							continue;
+							
+						if(entry.TypeName=="DiffuseTexture")
+							compiled.diffuse = handle;
+					}
 				}
 			}
 		}

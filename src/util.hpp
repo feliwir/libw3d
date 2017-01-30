@@ -4,6 +4,17 @@
 
 namespace libw3d
 {
+	static inline const std::string readString(std::ifstream& fin)
+	{
+		std::string buffer;
+        char c;
+        while ((c = fin.get()) != '\0') {
+            buffer += c;
+        }
+
+        return buffer;
+	}
+
 	template <typename T>
 	static inline T read(std::ifstream& fin)
 	{
