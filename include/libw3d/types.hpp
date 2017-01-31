@@ -10,13 +10,13 @@
 
 namespace libw3d
 {
-	#pragma pack(push, 1)
+#pragma pack(push, 1)
 	enum NormMapHeaderType : uint32_t
 	{
-		NORMTYPE_TEXTURE 	= 1,
-		NORMTYPE_BUMP 		= 2,
-		NORMTYPE_COLORS 	= 5,
-		NORMTYPE_ALPHA 		= 7
+		NORMTYPE_TEXTURE = 1,
+		NORMTYPE_BUMP = 2,
+		NORMTYPE_COLORS = 5,
+		NORMTYPE_ALPHA = 7
 	};
 
 
@@ -25,7 +25,7 @@ namespace libw3d
 		uint8_t		Number;
 		char		TypeName[W3D_TYPE_LEN];
 		uint32_t	Reserved;
-	} ;
+	};
 
 	// New entry item structure for BFME2 ....
 	struct NormMapEntryStruct
@@ -38,7 +38,7 @@ namespace libw3d
 		float 				ItemScalar;
 		Vector4f			ItemColor;
 		uint8_t				ItemAlpha;
-	} ;
+	};
 
 
 	struct HierarchyHeader
@@ -85,14 +85,14 @@ namespace libw3d
 		uint8_t VectorLen;
 		uint8_t Flags;
 		uint16_t Framecount;
-		uint16_t Pivot;		
+		uint16_t Pivot;
 	};
 
 	enum AnimationDeltaType
 	{
-		TIMECODED	= 0,
-		DELTA4		= 1,
-		DELTA8		= 2
+		TIMECODED = 0,
+		DELTA4 = 1,
+		DELTA8 = 2
 	};
 
 	struct MeshHeader
@@ -315,5 +315,46 @@ namespace libw3d
 		SOUNDROBJ_HEADER,       // general information such as name and version
 		SOUNDROBJ_DEFINITION,   // chunk containing the definition of the sound that is to play
 	};
-	#pragma pack(pop)
+
+	//--------------------------------------------------------------------------------
+	// Flags for the Mesh Attributes member
+	//--------------------------------------------------------------------------------
+	#define W3D_MESH_FLAG_NONE                            0x00000000  // plain ole normal mesh
+	#define W3D_MESH_FLAG_COLLISION_BOX                   0x00000001  // (obsolete as of 4.1) mesh is a collision box (should be 8 verts, should be hidden, etc)
+	#define W3D_MESH_FLAG_SKIN                            0x00000002  // (obsolete as of 4.1) skin mesh
+	#define W3D_MESH_FLAG_SHADOW                          0x00000004  // (obsolete as of 4.1) intended to be projected as a shadow
+	#define W3D_MESH_FLAG_ALIGNED                         0x00000008  // (obsolete as of 4.1) always aligns with camera
+
+	#define W3D_MESH_FLAG_COLLISION_TYPE_MASK             0x00000FF0  // mask for the collision type bits
+	#define W3D_MESH_FLAG_COLLISION_TYPE_SHIFT                     4  // shifting to get to the collision type bits
+	#define W3D_MESH_FLAG_COLLISION_TYPE_PHYSICAL         0x00000010  // physical collisions
+	#define W3D_MESH_FLAG_COLLISION_TYPE_PROJECTILE       0x00000020  // projectiles (rays) collide with this
+	#define W3D_MESH_FLAG_COLLISION_TYPE_VIS              0x00000040  // vis rays collide with this mesh
+	#define W3D_MESH_FLAG_COLLISION_TYPE_CAMERA           0x00000080  // camera rays/boxes collide with this mesh
+	#define W3D_MESH_FLAG_COLLISION_TYPE_VEHICLE          0x00000100  // vehicles collide with this mesh (and with physical collision meshes)
+
+	#define W3D_MESH_FLAG_HIDDEN                          0x00001000  // this mesh is hidden by default
+	#define W3D_MESH_FLAG_TWO_SIDED                       0x00002000  // render both sides of this mesh
+	#define OBSOLETE_W3D_MESH_FLAG_LIGHTMAPPED            0x00004000  // obsolete lightmapped mesh
+		// NOTE: retained for backwards compatibility - use W3D_MESH_FLAG_PRELIT_* instead.
+	#define W3D_MESH_FLAG_CAST_SHADOW                     0x00008000  // this mesh casts shadows
+
+	#define W3D_MESH_FLAG_GEOMETRY_TYPE_MASK              0x00FF0000  // (introduced with 4.1)
+	#define W3D_MESH_FLAG_GEOMETRY_TYPE_NORMAL            0x00000000  // (4.1+) normal mesh geometry
+	#define W3D_MESH_FLAG_GEOMETRY_TYPE_CAMERA_ALIGNED    0x00010000  // (4.1+) camera aligned mesh
+	#define W3D_MESH_FLAG_GEOMETRY_TYPE_SKIN              0x00020000  // (4.1+) skin mesh
+	#define OBSOLETE_W3D_MESH_FLAG_GEOMETRY_TYPE_SHADOW   0x00030000  // (4.1+) shadow mesh OBSOLETE!
+	#define W3D_MESH_FLAG_GEOMETRY_TYPE_AABOX             0x00040000  // (4.1+) aabox OBSOLETE!
+	#define W3D_MESH_FLAG_GEOMETRY_TYPE_OBBOX             0x00050000  // (4.1+) obbox OBSOLETE!
+	#define W3D_MESH_FLAG_GEOMETRY_TYPE_CAMERA_ORIENTED   0x00060000  // (4.1+) camera oriented mesh (points _towards_ camera)
+
+	#define W3D_MESH_FLAG_PRELIT_MASK                     0x0F000000  // (4.2+)
+	#define W3D_MESH_FLAG_PRELIT_UNLIT                    0x01000000  // mesh contains an unlit material chunk wrapper
+	#define W3D_MESH_FLAG_PRELIT_VERTEX                   0x02000000  // mesh contains a precalculated vertex-lit material chunk wrapper
+	#define W3D_MESH_FLAG_PRELIT_LIGHTMAP_MULTI_PASS      0x04000000  // mesh contains a precalculated multi-pass lightmapped material chunk wrapper
+	#define W3D_MESH_FLAG_PRELIT_LIGHTMAP_MULTI_TEXTURE   0x08000000  // mesh contains a precalculated multi-texture lightmapped material chunk wrapper
+
+	#define W3D_MESH_FLAG_SHATTERABLE                     0x10000000  // this mesh is shatterable.
+	#define W3D_MESH_FLAG_NPATCHABLE                      0x20000000  // it is ok to NPatch this mesh
+#pragma pack(pop)
 }

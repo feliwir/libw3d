@@ -1,12 +1,15 @@
 #pragma once
 #include <stdint.h>
 
-struct Targa
+namespace w3dview
 {
-	uint8_t Header[12];
-	uint16_t Width;
-	uint16_t Height;
-	uint8_t Bpp;
-	uint8_t Id;
-	uint8_t* Data;
-};
+	struct Targa
+	{
+		uint8_t Header[12];
+		uint16_t Width;
+		uint16_t Height;
+		uint8_t Bpp;
+		uint8_t Id;
+		uint8_t* Data;
+	};
+}

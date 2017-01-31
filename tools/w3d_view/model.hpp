@@ -5,45 +5,50 @@
 #include "shader.hpp"
 #include "texture.hpp"
 
-
-class CompiledModel
+namespace w3dview
 {
-public:
-	struct Vertex
+	class CompiledModel
 	{
-		glm::vec3 position;
-		glm::vec3 normal;
-		glm::vec2 txcoord;
-		glm::uint16 boneId;
-		glm::uint16 boneId2;
-	};
+	public:
+		struct Vertex
+		{
+			glm::vec3 position;
+			glm::vec3 normal;
+			glm::vec2 txcoord;
+			glm::ivec2 bones;
+		};
 
-	struct Pivot
-	{
-		int32_t parent;
-		glm::vec3 translate;
-		glm::vec3 eulerAngles;
-		glm::quat rotation;
-	};
+		struct Pivot
+		{
+			int32_t parent;
+			glm::vec3 translate;
+			glm::vec3 eulerAngles;
+			glm::quat rotation;
+		};
 
-	struct Mesh
-	{
-		//vertexbuffer
-		GLuint vbo;
-		//indexbuffer
-		GLuint ibo;
-		uint32_t num;
-		std::shared_ptr<Texture> diffuse;
-		int32_t pivot;
-	};
-public:
-	CompiledModel();
-	~CompiledModel();
+		struct Mesh
+		{
+			//vertexbuffer
+			GLuint vbo;
+			//indexbuffer
+			GLuint ibo;
+			uint32_t num;
+			std::shared_ptr<Texture> diffuse;
+			int32_t pivot;
+			bool skinned;
+			Mesh();
+		};
+	public:
+		CompiledModel();
+		~CompiledModel();
 
-	void Create(libw3d::Model& m);
-	void Render(Shader& s);
-private:
-	std::vector<Mesh> m_meshes;
-	static std::map < std::string, std::shared_ptr<Texture>> s_textures;
-	std::vector<Pivot> m_pivots;
-};
+		void Create(libw3d::Model& m);
+		void Render(Shader& s);
+	private:
+		std::vector<Mesh> m_meshes;
+		static std::map < std::string, std::shared_ptr<Texture>> s_textures;
+		std::vector<Pivot> m_pivots;
+		//precomputed bones for the shader
+		std::vector<glm::mat4> m_bones;
+	};
+}

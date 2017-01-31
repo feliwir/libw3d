@@ -2,6 +2,7 @@
 #include "flextGL.h"
 #include <vector>
 #include <iostream>
+using namespace w3dview;
 
 Shader::Shader() : m_vert(0),m_frag(0),m_program(0)
 {

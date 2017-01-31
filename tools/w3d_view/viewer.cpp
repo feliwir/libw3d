@@ -1,40 +1,7 @@
 #include "flextGL.h"
 #include "viewer.hpp"
 #include <iostream>
-using namespace libw3d;
-
-std::string Viewer::s_vertSrc =
-"#version 330\n"
-"layout (location=0)in vec3 pos;\n"
-"layout (location=1)in vec3 normal;\n"
-"layout (location=2)in vec2 txcoord;\n"
-"layout (location=3)in uint boneId1;\n"
-"layout (location=4)in uint boneId2;\n"
-"uniform mat4 vp;\n"
-"uniform mat4 m;\n"
-"out vec4 fnormal;\n"
-"out vec2 ftxcoord;\n"
-"void main()\n"
-"{\n"
-"	gl_Position = vp*m*vec4(pos,1);\n"
-"	ftxcoord = txcoord;\n"
-"   fnormal = vec4(normal,0);\n"
-"}";
-std::string Viewer::s_fragSrc =
-"#version 330\n"
-"in vec4 fnormal;\n"
-"in vec2 ftxcoord;\n"
-"uniform bool has_diffuse;\n"
-"uniform sampler2D diffuse;\n"
-"out vec4 color;\n"
-"void main()\n"
-"{\n"
-"	if(has_diffuse)\n"
-"		color = texture(diffuse,ftxcoord);\n"
-"	else\n"
-"		color = vec4(1.0,0,1.0,1.0);\n"
-"}";
-
+using namespace w3dview;
 
 void APIENTRY Viewer::Callback(GLenum source, GLenum type, GLuint id,
 	GLenum severity, GLsizei length, const char* message, const void* userParam)
@@ -77,12 +44,21 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3
 		glDebugMessageCallback(Viewer::Callback, nullptr);
 		#endif
 	}
+	//load shaders
 	glViewport(0, 0, m_width, m_height);
-	m_shader.Load(s_vertSrc, s_fragSrc);
-	m_shader.addUniform("m");
-	m_shader.addUniform("vp");
-	m_shader.addUniform("has_diffuse");
-	m_shader.addUniform("diffuse");
+	const std::string DefaultW3D_vs =
+#include "shaders/DefaultW3D.vs"
+		;
+	const std::string DefaultW3D_fs =
+#include "shaders/DefaultW3D.fs"
+		;
+	m_default.Load(DefaultW3D_vs, DefaultW3D_fs);
+	m_default.addUniform("m");
+	m_default.addUniform("vp");
+	m_default.addUniform("has_skinning");
+	m_default.addUniform("bones");
+	m_default.addUniform("has_diffuse");
+	m_default.addUniform("diffuse");
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
@@ -112,10 +88,10 @@ void Viewer::Run()
 	{
 		m_vp = m_projection*m_arcball.GetViewMatrix();
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		m_shader.Use();
-		glUniformMatrix4fv(m_shader.uniform("vp"), 1, false, glm::value_ptr(m_vp));
+		m_default.Use();
+		glUniformMatrix4fv(m_default.uniform("vp"), 1, false, glm::value_ptr(m_vp));
 		
-		m_model.Render(m_shader);
+		m_model.Render(m_default);
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();
 	}

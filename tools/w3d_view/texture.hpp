@@ -3,23 +3,26 @@
 #include <gli/gli.hpp>
 #include "flextGL.h"
 
-class Texture
+namespace w3dview
 {
-public:
-	enum Format
+	class Texture
 	{
-		RGB = 0,
-		RGBA = 1,
+	public:
+		enum Format
+		{
+			RGB = 0,
+			RGBA = 1,
+		};
+
+		Texture();
+		~Texture();
+
+		bool Load(const std::string& filename);
+
+		void Bind();
+	private:
+		GLuint m_texId;
+		gli::texture m_texture;
+		Format m_format;
 	};
-
-	Texture();
-	~Texture();
-
-	bool Load(const std::string& filename);
-
-	void Bind();
-private:
-	GLuint m_texId;
-	gli::texture m_texture;
-	Format m_format;
-};
+}

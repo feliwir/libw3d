@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+using namespace w3dview;
 
 Texture::Texture() : m_texId(0)
 {
@@ -78,7 +79,6 @@ bool Texture::Load(const std::string& filename)
 			glm::tvec3<GLsizei> Extent(m_texture.extent(Level));
 			glCompressedTexImage2D(Target, Level, Format.Internal, Extent.x, Extent.y, 0, static_cast<GLsizei>(m_texture.size(Level)), m_texture.data(0, 0, Level));
 		}
-
 	}
 
 	return true;

@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <stack>
+using namespace w3dview;
 std::map<std::string, std::shared_ptr<Texture>> CompiledModel::s_textures;
 
 CompiledModel::CompiledModel()
@@ -41,8 +42,10 @@ void CompiledModel::Create(libw3d::Model& m)
 	for (auto& mesh : m.Meshes)
 	{
 		Mesh compiled;
-		compiled.pivot = -1;
 		std::vector<Vertex> verts;
+
+		if (mesh->Header.Attributes & W3D_MESH_FLAG_GEOMETRY_TYPE_SKIN)
+			compiled.skinned = true;
 
 		for (auto& vert : mesh->Vertices)
 		{
@@ -60,8 +63,8 @@ void CompiledModel::Create(libw3d::Model& m)
 		for (unsigned int i = 0; i < mesh->VertexInfluences.size(); ++i)
 		{
 			auto& infl = mesh->VertexInfluences[i];
-			verts[i].boneId = infl.Bone;
-			verts[i].boneId2 = infl.Bone2;
+			verts[i].bones[0] = infl.Bone;
+			verts[i].bones[1] = infl.Bone2;
 		}
 
 		if (mesh->MatPass)
@@ -143,9 +146,7 @@ void CompiledModel::Create(libw3d::Model& m)
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, txcoord));
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 1, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, boneId));
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 1, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, boneId2));
+		glVertexAttribIPointer(3, 2, GL_INT, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, bones));
 		glGenBuffers(1, &compiled.ibo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, compiled.ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(glm::uint16), indices.data(), GL_STATIC_DRAW);
@@ -153,6 +154,21 @@ void CompiledModel::Create(libw3d::Model& m)
 		m_meshes.push_back(compiled);
 	}
 
+	//precompute bones
+	for (unsigned int i=0;i<m_pivots.size();++i)
+	{
+		auto& p = m_pivots[i];
+		glm::mat4 bone;
+		glm::translate(bone, p.translate);
+		bone *= glm::mat4_cast(p.rotation);
+		while (p.parent > 0)
+		{
+			p = m_pivots[p.parent];
+			glm::translate(bone, p.translate);
+			bone *= glm::mat4_cast(p.rotation);
+		}
+		m_bones.push_back(bone);
+	}
 }
 
 void CompiledModel::Render(Shader& s)
@@ -162,17 +178,15 @@ void CompiledModel::Render(Shader& s)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER,mesh.vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo);
+		
+		glUniform1i(s.uniform("has_diffuse"), (mesh.diffuse!=nullptr));
 		if (mesh.diffuse)
 		{
 			glActiveTexture(GL_TEXTURE0);
-			glUniform1i(s.uniform("has_diffuse"), true);
 			glUniform1i(s.uniform("diffuse"), 0);
 			mesh.diffuse->Bind();
 		}
-		else
-		{
-			glUniform1i(s.uniform("has_diffuse"), false);
-		}
+
 		glm::mat4 model;
 
 		if ((mesh.pivot != -1) && (m_pivots.size()>0))
@@ -197,13 +211,22 @@ void CompiledModel::Render(Shader& s)
 			}
 		}
 
+		glUniform1i(s.uniform("has_skinning"), mesh.skinned);
+		if (mesh.skinned)
+		{
+			glUniformMatrix4fv(s.uniform("bones"), m_bones.size(), false, glm::value_ptr(m_bones.front()));
+		}
+
 		glUniformMatrix4fv(s.uniform("m"), 1, false, glm::value_ptr(model));
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, position));
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, normal));
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, txcoord));
-		glVertexAttribPointer(3, 1, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, boneId));
-		glVertexAttribPointer(4, 1, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, boneId2));
+		glVertexAttribIPointer(3, 2, GL_INT, sizeof(CompiledModel::Vertex), (void*)offsetof(CompiledModel::Vertex, bones));
 
 		glDrawElements(GL_TRIANGLES, mesh.num, GL_UNSIGNED_SHORT, nullptr);
 	}
+}
+
+CompiledModel::Mesh::Mesh() : skinned(false), vbo(0),ibo(0),num(0),pivot(-1)
+{
 }

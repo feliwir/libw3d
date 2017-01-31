@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cxxopts.hpp>
 #include "viewer.hpp"
+using namespace w3dview;
 
 int main(int argc, char** argv)
 {

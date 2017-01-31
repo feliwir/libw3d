@@ -1,8 +1,15 @@
 find_package(OpenGL REQUIRED)
 
+file(GLOB_RECURSE SHADERS
+    "shaders/*.vs"
+    "shaders/*.fs"
+)
+
+
 add_executable(w3dview main.cpp arcball.hpp viewer.cpp 
 viewer.hpp flextGL.c flextGL.h model.hpp model.cpp
-shader.cpp shader.hpp targa.hpp texture.cpp texture.hpp)
+shader.cpp shader.hpp targa.hpp texture.cpp texture.hpp
+${SHADERS})
 
 set_property(TARGET w3dview PROPERTY CXX_STANDARD 14)
 
