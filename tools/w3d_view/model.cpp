@@ -63,8 +63,8 @@ void CompiledModel::Create(libw3d::Model& m)
 		for (unsigned int i = 0; i < mesh->VertexInfluences.size(); ++i)
 		{
 			auto& infl = mesh->VertexInfluences[i];
-			verts[i].bones[0] = infl.Bone;
-			verts[i].bones[1] = infl.Bone2;
+			verts[i].bones.x = infl.Bone;
+			verts[i].bones.y = infl.Bone2;
 		}
 
 		if (mesh->MatPass)
@@ -159,13 +159,16 @@ void CompiledModel::Create(libw3d::Model& m)
 	{
 		auto& p = m_pivots[i];
 		glm::mat4 bone;
-		glm::translate(bone, p.translate);
+		bone = glm::translate(bone, p.translate);
 		bone *= glm::mat4_cast(p.rotation);
+
 		while (p.parent > 0)
 		{
 			p = m_pivots[p.parent];
-			glm::translate(bone, p.translate);
-			bone *= glm::mat4_cast(p.rotation);
+			glm::mat4 cbone;
+			cbone = glm::translate(cbone, p.translate);
+			cbone *= glm::mat4_cast(p.rotation);
+			bone *= cbone;
 		}
 		m_bones.push_back(bone);
 	}
