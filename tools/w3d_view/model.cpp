@@ -175,7 +175,7 @@ void CompiledModel::Render(Shader& s)
 		}
 		glm::mat4 model;
 
-		if (mesh.pivot != -1)
+		if ((mesh.pivot != -1) && (m_pivots.size()>0))
 		{
 			int index = mesh.pivot;
 			std::stack<Pivot> m_order;

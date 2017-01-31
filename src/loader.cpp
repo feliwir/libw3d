@@ -12,8 +12,11 @@ Model Loader::FromFile(const std::string& filename,bool refload)
 	Model m;
 	std::ifstream fin(filename,std::ios::binary);
 	if (fin.fail())
+	{
+		std::cout << "Failed to load: " << filename << std::endl;
 		return m;
-	
+	}
+
 	fin.seekg(0, std::ios::end);
 	std::streampos fileSize = fin.tellg();
 	fin.seekg(0, std::ios::beg);
