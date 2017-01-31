@@ -85,7 +85,7 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3
 	m_shader.addUniform("diffuse");
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
-
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	float ratio = m_width / (float)m_height;
 	m_projection = glm::perspective(glm::radians(45.0f), 
