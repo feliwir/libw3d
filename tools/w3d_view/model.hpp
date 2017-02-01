@@ -50,5 +50,7 @@ namespace w3dview
 		std::vector<Pivot> m_pivots;
 		//precomputed bones for the shader
 		std::vector<glm::mat4> m_bones;
+	private:
+		void ComputePose();
 	};
 }

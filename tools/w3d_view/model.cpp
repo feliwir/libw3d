@@ -154,22 +154,35 @@ void CompiledModel::Create(libw3d::Model& m)
 		m_meshes.push_back(compiled);
 	}
 
+	ComputePose();
+}
+
+void CompiledModel::ComputePose()
+{
 	//precompute bones
 	for (unsigned int i=0;i<m_pivots.size();++i)
 	{
-		auto& p = m_pivots[i];
-		glm::mat4 bone;
-		bone = glm::translate(bone, p.translate);
-		bone *= glm::mat4_cast(p.rotation);
+		auto p = m_pivots[i];
+		
+		std::vector<glm::mat4> bonestack;
 
-		while (p.parent > 0)
+		while (p.parent > -1)
 		{
+			glm::mat4 bone;
+			bone = glm::translate(bone, p.translate);
+			bone *= glm::mat4_cast(p.rotation);
+			bonestack.push_back(bone);
 			p = m_pivots[p.parent];
-			glm::mat4 cbone;
-			cbone = glm::translate(cbone, p.translate);
-			cbone *= glm::mat4_cast(p.rotation);
-			bone *= cbone;
 		}
+
+		glm::mat4 bone;
+		uint32_t size = bonestack.size();
+		for (int i = 0; i <size; ++i)
+		{
+			auto& b = bonestack[size-(i+1)];
+			bone=b*bone;
+		}
+
 		m_bones.push_back(bone);
 	}
 }
@@ -192,26 +205,9 @@ void CompiledModel::Render(Shader& s)
 
 		glm::mat4 model;
 
-		if ((mesh.pivot != -1) && (m_pivots.size()>0))
+		if ((mesh.pivot != -1) && (m_bones.size()>0))
 		{
-			int index = mesh.pivot;
-			std::stack<Pivot> m_order;
-			while (index > -1)
-			{
-				auto p = m_pivots[index];
-				m_order.push(p);
-				index = p.parent;
-			}
-
-			uint32_t size = m_order.size();
-			for (int i = 0; i <size; ++i)
-			{
-				auto& p = m_order.top();
-				
-				model = glm::translate(model, p.translate);
-				model *= glm::mat4_cast(p.rotation);
-				m_order.pop();
-			}
+			model = m_bones[mesh.pivot];
 		}
 
 		glUniform1i(s.uniform("has_skinning"), mesh.skinned);
