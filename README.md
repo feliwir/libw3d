@@ -26,5 +26,6 @@ Parts missing is:
 - vertex colors
 - texture animation
 
-Sample screenshot of Barracks from Battle for Middleearth II
+Sample screenshot of Barracks from Battle for Middleearth II:
+
 ![Image of Gondor Barracks](img/barracks.png)

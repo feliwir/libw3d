@@ -15,6 +15,8 @@ void MaterialPass::Load(std::ifstream & fin, uint32_t chunksize)
 
 		switch (type)
 		{
+		case TEXTURE_STAGE:
+			break;
 		case STAGE_TEXCOORDS:
 			Texcoords = readArray<Vector2f>(fin, subend);
 			break;

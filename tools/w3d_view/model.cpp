@@ -179,7 +179,7 @@ void CompiledModel::ComputePose()
 		uint32_t size = bonestack.size();
 		for (int i = 0; i <size; ++i)
 		{
-			auto& b = bonestack[size-(i+1)];
+			auto& b = bonestack[i];
 			bone=b*bone;
 		}
 
