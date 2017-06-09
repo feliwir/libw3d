@@ -25,10 +25,14 @@ void Model::AddChunk(const std::shared_ptr<Chunk> chunk)
 		Unknown.push_back(chunk);
 		break;
 	}
-	
 }
 
 void Model::AddSkeleton(const Model& skl)
 {
 	Skeleton = skl.Skeleton;
+}
+
+void Model::AddAnimation(const Model& ani)
+{
+	Animations.insert(Animations.end(), ani.Animations.begin(), ani.Animations.end());
 }

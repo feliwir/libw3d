@@ -72,6 +72,9 @@ std::shared_ptr<Chunk> Loader::ReadChunk(std::ifstream& fin)
 	case HIERARCHY:
 		chunk = std::make_shared<Hierarchy>();
 		break;
+	case ANIMATION:
+		chunk = std::make_shared<Animation>();
+		break;
 	case COMPRESSED_ANIMATION:
 		chunk = std::make_shared<CompressedAnimation>();
 		break;
