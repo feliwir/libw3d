@@ -19,7 +19,6 @@ namespace libw3d
 		NORMTYPE_ALPHA = 7
 	};
 
-
 	struct NormMapHeaderStruct
 	{
 		uint8_t		Number;
@@ -76,6 +75,17 @@ namespace libw3d
 	{
 		uint32_t BoneIndex;
 		char     Name[W3D_NAME_LEN * 2];
+	};
+
+	struct ChannelHeader
+	{
+		uint16_t FirstFrame;
+		uint16_t FastFrame;
+		uint16_t VectorLen;
+		uint16_t Flags;
+		uint16_t Pivot;
+		uint16_t Pad;
+		std::vector<uint8_t> Data;
 	};
 
 	struct MotionChannelHeader
@@ -143,6 +153,15 @@ namespace libw3d
 		uint32_t  VertexMaterialCount;    // how many vertex materials are used
 		uint32_t  ShaderCount;            // how many shaders are used
 		uint32_t  TextureCount;           // how many textures are used
+	};
+
+	struct AnimationHeader
+	{
+		uint32_t Version;
+		char Name[W3D_NAME_LEN];
+		char HierarchyName[W3D_NAME_LEN];
+		uint32_t NumFrames;
+		uint16_t FrameRate;
 	};
 
 	struct CompressedAnimationHeader

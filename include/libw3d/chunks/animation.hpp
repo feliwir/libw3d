@@ -6,6 +6,15 @@
 
 namespace libw3d
 {
+	class Channel
+	{
+	public:
+		void Load(std::ifstream& fin, uint32_t chunksize, const ChannelHeader& header);
+	public:
+		ChannelHeader Header;
+		std::vector<uint8_t> Data;
+	};
+
 	class MotionChannel
 	{
 	public:
@@ -37,12 +46,15 @@ namespace libw3d
 	{
 	public:
 		virtual void Load(std::ifstream& fin, uint32_t chunksize) override;
+	private:
+		void AddChannel(std::ifstream& fin, uint32_t chunksize);
+	public:
+		AnimationHeader Header;
+		std::vector<std::shared_ptr<Channel>> Channels;
 	};
 
 	class CompressedAnimation : public Chunk
 	{
-	public:
-
 	public:
 		virtual void Load(std::ifstream& fin, uint32_t chunksize) override;
 	private:

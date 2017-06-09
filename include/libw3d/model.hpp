@@ -18,12 +18,16 @@ namespace libw3d
 
 		void AddSkeleton(const Model& skl);
 
+		void AddAnimation(const Model& ani);
+
 		inline void SetValid(bool valid)
 		{
 			m_valid = valid;
 		}
+
 	public:
 		std::vector<std::shared_ptr<Mesh>> Meshes;
+		std::vector<std::shared_ptr<Animation>> Animations;
 		std::vector<std::shared_ptr<CompressedAnimation>> CompressedAnimations;
 		std::vector<std::shared_ptr<Chunk>> Unknown;
 		std::shared_ptr<HLoD> HierarchyLoD;
