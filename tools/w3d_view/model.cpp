@@ -20,7 +20,7 @@ CompiledModel::~CompiledModel()
 	}
 }
 
-void CompiledModel::Create(libw3d::Model& m)
+void CompiledModel::Create(libw3d::Model& m,const std::string& basepath)
 {
 	//compile all meshes
 	if (m.Skeleton)
@@ -85,7 +85,9 @@ void CompiledModel::Create(libw3d::Model& m)
 					if (entry.TypeFlag == libw3d::NORMTYPE_TEXTURE)
 					{
 						auto handle = std::make_shared<Texture>();
-						if (!handle->Load(entry.ItemName))
+						auto name = entry.ItemName;
+						std::transform(name.begin(),name.end(),name.begin(),::tolower);
+						if (!handle->Load(basepath+"/"+ name))
 							continue;
 						
 						s_textures[entry.ItemName] = handle;
@@ -102,7 +104,9 @@ void CompiledModel::Create(libw3d::Model& m)
 			for (auto& tex : mesh->Textures->Textures)
 			{
 				auto handle = std::make_shared<Texture>();
-				if (!handle->Load(tex->Name))
+				auto name = tex->Name;
+				std::transform(name.begin(),name.end(),name.begin(),::tolower);
+				if (!handle->Load(basepath+"/"+ name))
 					continue;
 
 				s_textures[tex->Name] = handle;

@@ -4,6 +4,7 @@
 #include <libw3d/chunks/animation.hpp>
 #include <libw3d/chunks/hierarchy.hpp>
 #include <iostream>
+#include <algorithm>
 #include "util.hpp"
 using namespace libw3d;
 
@@ -16,6 +17,7 @@ Model Loader::FromFile(const std::string& filename, bool refload)
 		std::cout << "Failed to load: " << filename << std::endl;
 		return m;
 	}
+	auto base = getBasePath(filename);
 
 	fin.seekg(0, std::ios::end);
 	std::streampos fileSize = fin.tellg();
@@ -35,12 +37,14 @@ Model Loader::FromFile(const std::string& filename, bool refload)
 		if (hlod)
 		{
 			std::string skl_name = hlod->Header.HierarchyName;
+			
 			if (m.Meshes.size() > 0)
 			{
 				std::string container_name = m.Meshes[0]->Header.ContainerName;
 				if (container_name != skl_name)
 				{
-					Model skl = FromFile(skl_name + ".w3d");
+					std::transform(skl_name.begin(),skl_name.end(),skl_name.begin(),::tolower);
+					Model skl = FromFile(base+"/"+skl_name + ".w3d");
 					m.AddSkeleton(skl);
 				}
 			}

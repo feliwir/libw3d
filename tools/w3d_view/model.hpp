@@ -42,7 +42,7 @@ namespace w3dview
 		CompiledModel();
 		~CompiledModel();
 
-		void Create(libw3d::Model& m);
+		void Create(libw3d::Model& m,const std::string& basepath=".");
 		void Render(Shader& s);
 	private:
 		std::vector<Mesh> m_meshes;

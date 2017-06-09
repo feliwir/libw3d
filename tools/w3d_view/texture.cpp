@@ -27,15 +27,19 @@ Texture::~Texture()
 bool Texture::Load(const std::string& filename)
 {
 	std::string name = filename;
-	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	m_texture = gli::load(name);
+	
+	std::string ext = name.substr(name.find_last_of("."));
+	std::string noext = name.substr(0,name.find_last_of("."));
+	std::cout << noext << std::endl;
+
+	m_texture = gli::load(noext+".dds");
  	if (m_texture.empty())
 	{
 		GLuint format = GL_BGR;
-		std::ifstream fin(name,std::ios::binary);
+		std::ifstream fin(noext+".tga",std::ios::binary);
 		if (fin.fail())
 		{
-			std::cout << "Failed to load: " << filename << std::endl;
+			std::cout << "Failed to load: " << noext+".tga" << std::endl;
 			return false;
 		}
 			

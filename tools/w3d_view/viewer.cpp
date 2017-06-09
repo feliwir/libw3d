@@ -3,10 +3,19 @@
 #include <iostream>
 using namespace w3dview;
 
+static inline const std::string getBasePath(const std::string& file)
+{
+	auto found=file.find_last_of("/\\");
+	return file.substr(0,found);
+}
+
 void APIENTRY Viewer::Callback(GLenum source, GLenum type, GLuint id,
 	GLenum severity, GLsizei length, const char* message, const void* userParam)
 {
-	std::cout << message << std::endl;
+	if(type!=GL_DEBUG_TYPE_ERROR)
+		return;
+
+	std::cout << "[GL]"<< message << std::endl;
 }
 
 Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3(1,0,0))
@@ -74,8 +83,7 @@ Viewer::~Viewer()
 	{
 		glDeleteVertexArrays(1, &m_vao);
 		m_vao = 0;
-	}
-		
+	}	
 	glfwTerminate();
 }
 
@@ -100,7 +108,9 @@ void Viewer::Run()
 bool Viewer::SetInput(const std::string& name)
 {
 	auto model = libw3d::Loader::FromFile(name, true);
-	m_model.Create(model);
+	auto base = getBasePath(name);
+	std::cout << base << std::endl,
+	m_model.Create(model,base);
 	return false;
 }
 
@@ -114,6 +124,11 @@ void Viewer::SetHeight(const unsigned int height)
 {
 	m_height = height;
 	glfwSetWindowSize(m_window,m_width, m_height);
+}
+
+bool Viewer::SetAnimation(const std::string& ani)
+{
+
 }
 
 void Viewer::Error(int error, const char* description)

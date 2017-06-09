@@ -4,6 +4,12 @@
 
 namespace libw3d
 {
+	static inline const std::string getBasePath(const std::string& file)
+	{
+		auto found=file.find_last_of("/\\");
+  		return file.substr(0,found);
+	}
+
 	static inline const std::string readString(std::ifstream& fin)
 	{
 		std::string buffer;
