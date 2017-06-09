@@ -19,6 +19,7 @@ namespace w3dview
 		//Run
 		void Run();
 		bool SetInput(const std::string& name);
+		bool SetAnimation(const std::string& name);
 		void SetWidth(const unsigned int width);
 		void SetHeight(const unsigned int height);
 
