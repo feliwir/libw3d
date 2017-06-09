@@ -119,7 +119,6 @@ void CompiledModel::Create(libw3d::Model& m)
 			indices.push_back(tri.Indices[2]);
 		}
 
-
 		if (m.HierarchyLoD)
 		{
 			if (m.HierarchyLoD->SubObjectArray)
@@ -154,13 +153,18 @@ void CompiledModel::Create(libw3d::Model& m)
 		m_meshes.push_back(compiled);
 	}
 
+	for (auto& ani : m.Animations)
+	{
+		m_animations.push_back(ani);
+	}
+
 	ComputePose();
 }
 
 void CompiledModel::ComputePose()
 {
 	//precompute bones
-	for (unsigned int i=0;i<m_pivots.size();++i)
+	for (unsigned int i=0; i<m_pivots.size(); ++i)
 	{
 		auto p = m_pivots[i];
 		
@@ -180,7 +184,7 @@ void CompiledModel::ComputePose()
 		for (int i = 0; i <size; ++i)
 		{
 			auto& b = bonestack[i];
-			bone=b*bone;
+			bone = b * bone;
 		}
 
 		m_bones.push_back(bone);
@@ -189,7 +193,16 @@ void CompiledModel::ComputePose()
 
 void CompiledModel::Render(Shader& s)
 {
-	
+	//compute pose with ani
+	if (m_animations.size() > 0)
+	{
+		for (auto channel : m_animations[0]->Channels)
+		{
+			if (channel)
+		}
+	}
+
+
 	for (auto& mesh : m_meshes)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER,mesh.vbo);

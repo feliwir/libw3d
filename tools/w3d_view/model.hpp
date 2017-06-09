@@ -48,8 +48,11 @@ namespace w3dview
 		std::vector<Mesh> m_meshes;
 		static std::map < std::string, std::shared_ptr<Texture>> s_textures;
 		std::vector<Pivot> m_pivots;
+		std::vector<std::shared_ptr<libw3d::Animation>> m_animations;
 		//precomputed bones for the shader
 		std::vector<glm::mat4> m_bones;
+
+		int frame;
 	private:
 		void ComputePose();
 	};

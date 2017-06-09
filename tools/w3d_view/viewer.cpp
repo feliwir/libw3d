@@ -86,7 +86,7 @@ void Viewer::Run()
 
 	while (!glfwWindowShouldClose(m_window))
 	{
-		m_vp = m_projection*m_arcball.GetViewMatrix();
+		m_vp = m_projection * m_arcball.GetViewMatrix();
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		m_default.Use();
 		glUniformMatrix4fv(m_default.uniform("vp"), 1, false, glm::value_ptr(m_vp));
