@@ -7,10 +7,10 @@
 #include "util.hpp"
 using namespace libw3d;
 
-Model Loader::FromFile(const std::string& filename,bool refload)
+Model Loader::FromFile(const std::string& filename, bool refload)
 {
 	Model m;
-	std::ifstream fin(filename,std::ios::binary);
+	std::ifstream fin(filename, std::ios::binary);
 	if (fin.fail())
 	{
 		std::cout << "Failed to load: " << filename << std::endl;
@@ -35,10 +35,14 @@ Model Loader::FromFile(const std::string& filename,bool refload)
 		if (hlod)
 		{
 			std::string skl_name = hlod->Header.HierarchyName;
-			if (skl_name.size()>0)
+			if (m.Meshes.size() > 0)
 			{
-				Model skl = FromFile(skl_name + ".w3d");
-				m.AddSkeleton(skl);
+				std::string container_name = m.Meshes[0]->Header.ContainerName;
+				if (container_name != skl_name)
+				{
+					Model skl = FromFile(skl_name + ".w3d");
+					m.AddSkeleton(skl);
+				}
 			}
 		}
 	}
