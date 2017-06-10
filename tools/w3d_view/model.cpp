@@ -179,8 +179,9 @@ void CompiledModel::Create(libw3d::Model& m,const std::string& basepath)
 	for (auto& ani : m.Animations)
 	{
 		Animation a;
-		a.frame = 0;
+		a.frame = 1;
 		a.animation = ani;
+		a.passed = 0;
 		a.delta = 1000.0 / ani->Header.FrameRate;
 		m_animations.push_back(a);
 	}
@@ -235,45 +236,50 @@ void CompiledModel::nextFrame()
 	{
 		//works only for one animation !!!
 		auto& ani = m_animations[ca];
-		ani.frame %= ani.animation->Header.NumFrames;
 		ani.passed += passed;
 
-		if(ani.passed>ani.delta)
+		if(ani.passed > ani.delta)
 		{
 			std::cout << "next frame" << std::endl;
 			ani.frame += static_cast<int>(ani.passed/ani.delta);
 			ani.passed = fmod(ani.passed,ani.delta);
 		}
+		ani.frame %= ani.animation->Header.NumFrames;
+		ani.frame--;
 			
 		for (auto channel : ani.animation->Channels)
 		{
 			int firstFrame = channel->Header.FirstFrame;
 			int lastFrame = channel->Header.LastFrame;
+			auto& bone = m_frame_bones[channel->Header.Pivot];
+
+			if (ani.frame < firstFrame) continue;
+			//if (ani.frame > lastFrame) continue;
 
 			switch (channel->Header.Flags)
 			{
 			case 0:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					m_frame_bones[channel->Header.Pivot] = glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(data[ani.frame - firstFrame], 0.0, 0.0));
+					bone = glm::translate(bone, glm::vec3(data[ani.frame - firstFrame], 0.0, 0.0));
 				}
 				break;
 			case 1:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					m_frame_bones[channel->Header.Pivot] = glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, data[ani.frame - firstFrame], 0.0));
+					bone = glm::translate(bone, glm::vec3(0.0, data[ani.frame - firstFrame], 0.0));
 				}
 				break;
 			case 2:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					m_frame_bones[channel->Header.Pivot] = glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, 0.0, data[ani.frame - firstFrame]));
+					bone = glm::translate(bone, glm::vec3(0.0, 0.0, data[ani.frame - firstFrame]));
 				}
 				break;
 			case 3:
 				{
 					auto data = getDataVector<glm::vec4>(channel->Data);
-					m_frame_bones[channel->Header.Pivot] *= data[ani.frame - firstFrame];
+					bone *= data[ani.frame - firstFrame];
 				}
 				break;
 			}
