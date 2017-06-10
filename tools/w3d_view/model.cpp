@@ -43,6 +43,8 @@ void CompiledModel::Create(libw3d::Model& m,const std::string& basepath)
 	m_pivots.clear();
 	m_meshes.clear();
 	m_animations.clear();
+	m_bones.clear();
+	m_frame_bones.clear();
 
 	//compile all meshes
 	if (m.Skeleton)
