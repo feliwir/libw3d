@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "math.hpp"
+#include <vector>
 
 #define W3D_MAKE_VERSION(major,minor)   (((major) << 16) | (minor))
 #define W3D_GET_MAJOR_VERSION(ver)      ((ver)>>16)
@@ -80,7 +81,7 @@ namespace libw3d
 	struct ChannelHeader
 	{
 		uint16_t FirstFrame;
-		uint16_t FastFrame;
+		uint16_t LastFrame;
 		uint16_t VectorLen;
 		uint16_t Flags;
 		uint16_t Pivot;
