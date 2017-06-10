@@ -215,8 +215,6 @@ void CompiledModel::ComputePose()
 
 void CompiledModel::Render(Shader& s)
 {
-
-
 	//compute pose with ani
 	if (m_animations.size() > 0)
 	{

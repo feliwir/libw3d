@@ -29,7 +29,7 @@ void Animation::AddChannel(std::ifstream& fin, uint32_t chunksize)
 {
 	std::shared_ptr<Channel> channel = std::make_shared<Channel>();
 	assert(chunksize > sizeof(ChannelHeader));
-	ChannelHeader header = read<ChannelHeader>(fin);
+	ChannelHeader header;
 	header.FirstFrame = read<uint16_t>(fin);
 	header.LastFrame = read<uint16_t>(fin);
 	header.VectorLen = read<uint16_t>(fin);
