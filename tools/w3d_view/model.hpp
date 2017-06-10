@@ -23,6 +23,7 @@ namespace w3dview
 
 		struct Pivot
 		{
+			int id;
 			int32_t parent;
 			glm::vec3 translate;
 			glm::vec3 eulerAngles;

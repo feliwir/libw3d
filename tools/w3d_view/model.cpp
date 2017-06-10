@@ -49,6 +49,7 @@ void CompiledModel::Create(libw3d::Model& m,const std::string& basepath)
 	//compile all meshes
 	if (m.Skeleton)
 	{
+		int i = 0;
 		for (auto& pivot : m.Skeleton->Bones)
 		{
 			Pivot p;
@@ -59,6 +60,7 @@ void CompiledModel::Create(libw3d::Model& m,const std::string& basepath)
 				pivot.Translation.Y, pivot.Translation.Z);
 			p.rotation = glm::quat(pivot.Rotation.W, pivot.Rotation.X,
 				pivot.Rotation.Y, pivot.Rotation.Z);
+			p.id = i++;
 			m_pivots.push_back(p);
 		}
 	}
@@ -305,12 +307,25 @@ void CompiledModel::nextFrame()
 				auto& b = m_frame_bones[i];
 				auto p = m_pivots[i];
 
-				while(p.parent>-1)
+				std::vector<glm::mat4> bonestack;
+
+				while (p.parent > -1)
 				{
-					
+					glm::mat4 bone;
+					bone = glm::translate(bone, trans[p.id]);
+					bone *= rots[p.id];
+					bonestack.push_back(bone);
 					p = m_pivots[p.parent];
 				}
 
+				glm::mat4 bone = b;
+				uint32_t size = bonestack.size();
+				for (int i = 0; i <size; ++i)
+				{
+					auto& b = bonestack[i];
+					bone = b * bone;
+				}
+				m_frame_bones[i] = bone;
 			}
 		}
 	}
