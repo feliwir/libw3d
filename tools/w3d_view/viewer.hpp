@@ -39,7 +39,9 @@ namespace w3dview
 		unsigned int m_width;
 		unsigned int m_height;
 		GLFWwindow* m_window;
-		CompiledModel m_model;
+		CompiledModel m_cmodel;
+		std::string m_base;
+		libw3d::Model m_model;
 		Shader m_default;
 		Arcball m_arcball;
 		GLuint m_vao;

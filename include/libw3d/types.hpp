@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <vector>
 #include "math.hpp"
 
 #define W3D_MAKE_VERSION(major,minor)   (((major) << 16) | (minor))

@@ -22,6 +22,10 @@ CompiledModel::~CompiledModel()
 
 void CompiledModel::Create(libw3d::Model& m,const std::string& basepath)
 {
+	m_pivots.clear();
+	m_meshes.clear();
+	m_animations.clear();
+
 	//compile all meshes
 	if (m.Skeleton)
 	{
@@ -202,7 +206,7 @@ void CompiledModel::Render(Shader& s)
 	{
 		for (auto channel : m_animations[0]->Channels)
 		{
-			if (channel)
+			
 		}
 	}
 
