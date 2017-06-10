@@ -43,8 +43,8 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3
 	glfwSetMouseButtonCallback(m_window, MouseButton);
 	glfwSetWindowUserPointer(m_window, this);
 	glfwMakeContextCurrent(m_window);
-	glfwSwapInterval(0);
-
+	glfwSwapInterval(60);
+	
 	flextInit(m_window);
 	if (FLEXT_KHR_debug)
 	{

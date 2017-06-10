@@ -229,10 +229,7 @@ void CompiledModel::nextFrame()
 	auto now = clock::now();
 	double passed = std::chrono::duration_cast<std::chrono::microseconds>(now - m_last).count()/1000.0;
 	m_last = now;
-	for (auto& f_bone : m_frame_bones)
-	{
-		f_bone = glm::mat4(1.0);
-	}
+
 	int ca = m_currentAni;
 	//compute pose with ani
 	if (m_animations.size() > ca)
@@ -241,10 +238,19 @@ void CompiledModel::nextFrame()
 		auto& ani = m_animations[ca];
 		ani.passed += passed;
 
+		int passed_frames = static_cast<int>(ani.passed / ani.delta);
+		std::cout << "Passed frames: " << passed_frames << std::endl;
+
 		if(ani.passed > ani.delta)
 		{
-			std::cout << "next frame" << std::endl;
-			ani.frame += static_cast<int>(ani.passed / ani.delta);
+			int i = 0;
+			for (auto& f_bone : m_frame_bones)
+			{
+				f_bone = m_bones[i];
+				++i;
+			}
+			
+			ani.frame += passed_frames;
 			ani.passed = fmod(ani.passed, ani.delta);
 
 			ani.frame %= ani.animation->Header.NumFrames;
@@ -257,9 +263,6 @@ void CompiledModel::nextFrame()
 				int f = ani.frame  - firstFrame -1;
 				f = std::max(0, f);
 				f = std::min(lastFrame - firstFrame -1, f);
-
-				if (ani.frame < firstFrame) continue;
-				//if (ani.frame > lastFrame) continue;
 
 				switch (channel->Header.Flags)
 				{
