@@ -8,7 +8,7 @@
 
 namespace w3dview
 {
-	typedef std::chrono::high_resolution_clock clock;
+	typedef std::chrono::system_clock clock;
 
 	class CompiledModel
 	{

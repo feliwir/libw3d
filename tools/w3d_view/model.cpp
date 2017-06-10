@@ -2,6 +2,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/transform.hpp>
 #include <stack>
 #include <iostream>
 using namespace w3dview;
@@ -225,7 +228,7 @@ void CompiledModel::nextFrame()
 {
 	auto now = clock::now();
 	double passed = std::chrono::duration_cast<std::chrono::microseconds>(now - m_last).count()/1000.0;
-
+	m_last = now;
 	for (auto& f_bone : m_frame_bones)
 	{
 		f_bone = glm::mat4(1.0);
@@ -241,8 +244,8 @@ void CompiledModel::nextFrame()
 		if(ani.passed > ani.delta)
 		{
 			std::cout << "next frame" << std::endl;
-			ani.frame += static_cast<int>(ani.passed/ani.delta);
-			ani.passed = fmod(ani.passed,ani.delta);
+			ani.frame += static_cast<int>(ani.passed / ani.delta);
+			ani.passed = fmod(ani.passed, ani.delta);
 		}
 		ani.frame %= ani.animation->Header.NumFrames;
 		ani.frame--;
@@ -276,17 +279,16 @@ void CompiledModel::nextFrame()
 					bone = glm::translate(bone, glm::vec3(0.0, 0.0, data[ani.frame - firstFrame]));
 				}
 				break;
-			case 3:
+			case 6:
 				{
-					auto data = getDataVector<glm::vec4>(channel->Data);
-					bone *= data[ani.frame - firstFrame];
+					auto data = getDataVector<glm::quat>(channel->Data);
+					auto r_mat = glm::toMat4(data[ani.frame - firstFrame]);
+					bone *= r_mat;
 				}
 				break;
 			}
 		}
 	}
-
-	m_last = now;
 }
 
 void CompiledModel::Render(Shader& s)
