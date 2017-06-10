@@ -21,6 +21,9 @@ void Animation::Load(std::ifstream & fin, uint32_t chunksize)
 		case ANIMATION_CHANNEL:
 			AddChannel(fin, size);
 			break;
+		default:
+			fin.seekg(size, std::ios::cur);
+			break;
 		}
 	}
 }
@@ -59,6 +62,9 @@ void CompressedAnimation::Load(std::ifstream & fin, uint32_t chunksize)
 			break;
 		case COMPRESSED_ANIMATION_MOTION_CHANNEL:
 			AddChannel(fin, size);
+			break;
+		default:
+			fin.seekg(size, std::ios::cur);
 			break;
 		}
 	}
