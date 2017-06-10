@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <stack>
+#include <iostream>
 using namespace w3dview;
 std::map<std::string, std::shared_ptr<Texture>> CompiledModel::s_textures;
 
@@ -20,7 +21,7 @@ std::vector<T> getDataVector(std::vector<uint8_t> data)
 	return result;
 }
 
-CompiledModel::CompiledModel() : m_frame(0)
+CompiledModel::CompiledModel() : m_currentAni(0)
 {
 
 }
@@ -177,10 +178,15 @@ void CompiledModel::Create(libw3d::Model& m,const std::string& basepath)
 
 	for (auto& ani : m.Animations)
 	{
-		m_animations.push_back(ani);
+		Animation a;
+		a.frame = 0;
+		a.animation = ani;
+		a.delta = 1000.0 / ani->Header.FrameRate;
+		m_animations.push_back(a);
 	}
-
+ 
 	ComputePose();
+	m_last = clock::now();
 }
 
 void CompiledModel::ComputePose()
@@ -214,20 +220,32 @@ void CompiledModel::ComputePose()
 	}
 }
 
-void CompiledModel::Render(Shader& s)
+void CompiledModel::nextFrame()
 {
+	auto now = clock::now();
+	double passed = std::chrono::duration_cast<std::chrono::microseconds>(now - m_last).count()/1000.0;
+
 	for (auto& f_bone : m_frame_bones)
 	{
 		f_bone = glm::mat4(1.0);
 	}
-
+	int ca = m_currentAni;
 	//compute pose with ani
-	if (m_animations.size() > 0)
+	if (m_animations.size() > ca)
 	{
 		//works only for one animation !!!
-		m_frame = m_frame % m_animations[0]->Header.NumFrames;
+		auto& ani = m_animations[ca];
+		ani.frame %= ani.animation->Header.NumFrames;
+		ani.passed += passed;
 
-		for (auto channel : m_animations[0]->Channels)
+		if(ani.passed>ani.delta)
+		{
+			std::cout << "next frame" << std::endl;
+			ani.frame += static_cast<int>(ani.passed/ani.delta);
+			ani.passed = fmod(ani.passed,ani.delta);
+		}
+			
+		for (auto channel : ani.animation->Channels)
 		{
 			int firstFrame = channel->Header.FirstFrame;
 			int lastFrame = channel->Header.LastFrame;
@@ -237,34 +255,38 @@ void CompiledModel::Render(Shader& s)
 			case 0:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(data[m_frame - firstFrame], 0.0, 0.0));
+					m_frame_bones[channel->Header.Pivot] = glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(data[ani.frame - firstFrame], 0.0, 0.0));
 				}
 				break;
 			case 1:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, data[m_frame - firstFrame], 0.0));
+					m_frame_bones[channel->Header.Pivot] = glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, data[ani.frame - firstFrame], 0.0));
 				}
 				break;
 			case 2:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, 0.0, data[m_frame - firstFrame]));
+					m_frame_bones[channel->Header.Pivot] = glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, 0.0, data[ani.frame - firstFrame]));
 				}
 				break;
 			case 3:
 				{
 					auto data = getDataVector<glm::vec4>(channel->Data);
-					m_frame_bones[channel->Header.Pivot] *= data[m_frame - firstFrame];
+					m_frame_bones[channel->Header.Pivot] *= data[ani.frame - firstFrame];
 				}
 				break;
 			}
 		}
-
-		m_frame++;
 	}
-	
 
+	m_last = now;
+}
+
+void CompiledModel::Render(Shader& s)
+{
+	nextFrame();
+	
 	for (auto& mesh : m_meshes)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER,mesh.vbo);
