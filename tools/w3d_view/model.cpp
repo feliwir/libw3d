@@ -246,47 +246,53 @@ void CompiledModel::nextFrame()
 			std::cout << "next frame" << std::endl;
 			ani.frame += static_cast<int>(ani.passed / ani.delta);
 			ani.passed = fmod(ani.passed, ani.delta);
-		}
-		ani.frame %= ani.animation->Header.NumFrames;
-		ani.frame--;
-			
-		for (auto channel : ani.animation->Channels)
-		{
-			int firstFrame = channel->Header.FirstFrame;
-			int lastFrame = channel->Header.LastFrame;
-			auto& bone = m_frame_bones[channel->Header.Pivot];
 
-			if (ani.frame < firstFrame) continue;
-			//if (ani.frame > lastFrame) continue;
+			ani.frame %= ani.animation->Header.NumFrames;
 
-			switch (channel->Header.Flags)
+			for (auto channel : ani.animation->Channels)
 			{
-			case 0:
+				int firstFrame = channel->Header.FirstFrame;
+				int lastFrame = channel->Header.LastFrame;
+				auto& bone = m_frame_bones[channel->Header.Pivot];
+				int f = ani.frame  - firstFrame -1;
+				f = std::max(0, f);
+				f = std::min(lastFrame - firstFrame -1, f);
+
+				if (ani.frame < firstFrame) continue;
+				//if (ani.frame > lastFrame) continue;
+
+				switch (channel->Header.Flags)
+				{
+				case 0:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					bone = glm::translate(bone, glm::vec3(data[ani.frame - firstFrame], 0.0, 0.0));
+					bone = glm::translate(bone, glm::vec3(data[f], 0.0, 0.0));
 				}
 				break;
-			case 1:
+				case 1:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					bone = glm::translate(bone, glm::vec3(0.0, data[ani.frame - firstFrame], 0.0));
+					bone = glm::translate(bone, glm::vec3(0.0, data[f], 0.0));
 				}
 				break;
-			case 2:
+				case 2:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					bone = glm::translate(bone, glm::vec3(0.0, 0.0, data[ani.frame - firstFrame]));
+					bone = glm::translate(bone, glm::vec3(0.0, 0.0, data[f]));
 				}
 				break;
-			case 6:
+				case 6:
 				{
 					auto data = getDataVector<glm::quat>(channel->Data);
-					auto r_mat = glm::toMat4(data[ani.frame - firstFrame]);
+					auto raw = data[f];
+					auto quad = glm::quat(raw.w, raw.x, raw.y, raw.z);
+					auto r_mat = glm::toMat4(quad);
 					bone *= r_mat;
 				}
 				break;
+				}
 			}
+
 		}
 	}
 }
