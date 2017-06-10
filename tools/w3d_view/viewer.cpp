@@ -33,7 +33,7 @@ Viewer::Viewer() : m_width(800),m_height(600), m_vao(0), m_arcball(100,glm::vec3
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	#endif	
 
-	m_window = glfwCreateWindow(m_width, m_height, "W3d viewer", NULL, NULL);
+	m_window = glfwCreateWindow(m_width, m_height, "W3D Viewer", NULL, NULL);
 	if (m_window == NULL)
 		exit(EXIT_FAILURE);
 
@@ -99,7 +99,7 @@ void Viewer::Run()
 		m_default.Use();
 		glUniformMatrix4fv(m_default.uniform("vp"), 1, false, glm::value_ptr(m_vp));
 		
-		m_model.Render(m_default);
+		m_cmodel.Render(m_default);
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();
 	}
@@ -107,11 +107,15 @@ void Viewer::Run()
 
 bool Viewer::SetInput(const std::string& name)
 {
-	auto model = libw3d::Loader::FromFile(name, true);
-	auto base = getBasePath(name);
-	std::cout << base << std::endl,
-	m_model.Create(model,base);
-	return false;
+	m_model = libw3d::Loader::FromFile(name, true);
+	if(!m_model.IsValid())
+		return false;
+
+	std::string title = "W3D Viewer - " + name;
+	glfwSetWindowTitle(m_window,title.c_str());
+	m_base = getBasePath(name);
+	m_cmodel.Create(m_model,m_base);
+	return true;
 }
 
 void Viewer::SetWidth(const unsigned int width)
@@ -128,6 +132,10 @@ void Viewer::SetHeight(const unsigned int height)
 
 bool Viewer::SetAnimation(const std::string& ani)
 {
+	auto anim = libw3d::Loader::FromFile(ani, false);
+
+	m_model.AddAnimation(anim);
+	m_cmodel.Create(m_model,m_base);
 	return true;
 }
 

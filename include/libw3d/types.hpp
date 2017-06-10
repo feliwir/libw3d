@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <vector>
 #include "math.hpp"
 #include <vector>
 
@@ -162,7 +163,7 @@ namespace libw3d
 		char Name[W3D_NAME_LEN];
 		char HierarchyName[W3D_NAME_LEN];
 		uint32_t NumFrames;
-		uint16_t FrameRate;
+		uint32_t FrameRate;
 	};
 
 	struct CompressedAnimationHeader

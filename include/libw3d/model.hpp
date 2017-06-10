@@ -25,6 +25,10 @@ namespace libw3d
 			m_valid = valid;
 		}
 
+		inline bool IsValid()
+		{
+			return m_valid;
+		}
 	public:
 		std::vector<std::shared_ptr<Mesh>> Meshes;
 		std::vector<std::shared_ptr<Animation>> Animations;
