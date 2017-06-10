@@ -15,6 +15,9 @@ void Model::AddChunk(const std::shared_ptr<Chunk> chunk)
 	case HIERARCHY:
 		Skeleton = std::dynamic_pointer_cast<Hierarchy>(chunk);
 		break;
+	case ANIMATION:
+		Animations.push_back(std::dynamic_pointer_cast<Animation>(chunk));
+		break;
 	case COMPRESSED_ANIMATION:
 		CompressedAnimations.push_back(std::dynamic_pointer_cast<CompressedAnimation>(chunk));
 		break;
