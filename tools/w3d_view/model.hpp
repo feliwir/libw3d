@@ -53,7 +53,7 @@ namespace w3dview
 		std::vector<glm::mat4> m_bones;
 		std::vector<glm::mat4> m_frame_bones;
 
-		int frame;
+		int m_frame;
 	private:
 		void ComputePose();
 	};

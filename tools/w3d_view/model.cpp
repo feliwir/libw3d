@@ -20,7 +20,7 @@ std::vector<T> getDataVector(std::vector<uint8_t> data)
 	return result;
 }
 
-CompiledModel::CompiledModel()
+CompiledModel::CompiledModel() : m_frame(0)
 {
 
 }
@@ -216,54 +216,54 @@ void CompiledModel::ComputePose()
 
 void CompiledModel::Render(Shader& s)
 {
-	//for (auto& f_bone : m_frame_bones)
-	//{
-	//	f_bone = glm::mat4(1.0);
-	//}
+	for (auto& f_bone : m_frame_bones)
+	{
+		f_bone = glm::mat4(1.0);
+	}
 
-	////compute pose with ani
-	//if (m_animations.size() > 0)
-	//{
-	//	//works only for one animation !!!
-	//	frame = frame % m_animations[0]->Header.NumFrames;
+	//compute pose with ani
+	if (m_animations.size() > 0)
+	{
+		//works only for one animation !!!
+		m_frame = m_frame % m_animations[0]->Header.NumFrames;
 
-	//	for (auto channel : m_animations[0]->Channels)
-	//	{
-	//		int firstFrame = channel->Header.FirstFrame;
-	//		int lastFrame = channel->Header.LastFrame;
-	//		if (firstFrame > frame || lastFrame < frame)
-	//			return;
+		for (auto channel : m_animations[0]->Channels)
+		{
+			int firstFrame = channel->Header.FirstFrame;
+			int lastFrame = channel->Header.LastFrame;
 
-	//		switch (channel->Header.Flags)
-	//		{
-	//		case 0:
-	//			{
-	//				/*auto data = getDataVector<float>(channel->Data);
-	//				glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(data[frame - firstFrame], 0.0, 0.0));*/
-	//			}
-	//			break;
-	//		case 1:
-	//			{
-	//				/*auto data = getDataVector<float>(channel->Data);
-	//				glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, data[frame - firstFrame], 0.0));*/
-	//			}
-	//			break;
-	//		case 2:
-	//			{
-	//				/*auto data = getDataVector<float>(channel->Data);
-	//				glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, 0.0, data[frame - firstFrame]));*/
-	//			}
-	//			break;
-	//		case 3:
-	//			{
-	//				/*auto data = getDataVector<glm::vec4>(channel->Data);
-	//				m_frame_bones[channel->Header.Pivot] *= data[frame - firstFrame];*/
-	//			}
-	//			break;
-	//		}
-	//	}
-	//}
-	//frame++;
+			switch (channel->Header.Flags)
+			{
+			case 0:
+				{
+					auto data = getDataVector<float>(channel->Data);
+					glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(data[m_frame - firstFrame], 0.0, 0.0));
+				}
+				break;
+			case 1:
+				{
+					auto data = getDataVector<float>(channel->Data);
+					glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, data[m_frame - firstFrame], 0.0));
+				}
+				break;
+			case 2:
+				{
+					auto data = getDataVector<float>(channel->Data);
+					glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, 0.0, data[m_frame - firstFrame]));
+				}
+				break;
+			case 3:
+				{
+					auto data = getDataVector<glm::vec4>(channel->Data);
+					m_frame_bones[channel->Header.Pivot] *= data[m_frame - firstFrame];
+				}
+				break;
+			}
+		}
+
+		m_frame++;
+	}
+	
 
 	for (auto& mesh : m_meshes)
 	{
@@ -290,7 +290,7 @@ void CompiledModel::Render(Shader& s)
 		{
 			if (m_animations.size() > 0)
 			{
-				glUniformMatrix4fv(s.uniform("bones"), m_bones.size(), false, glm::value_ptr(m_bones.front()));
+				glUniformMatrix4fv(s.uniform("bones"), m_frame_bones.size(), false, glm::value_ptr(m_frame_bones.front()));
 			}
 			else
 			{
