@@ -31,7 +31,7 @@ void Animation::AddChannel(std::ifstream& fin, uint32_t chunksize)
 	assert(chunksize > sizeof(ChannelHeader));
 	ChannelHeader header = read<ChannelHeader>(fin);
 	header.FirstFrame = read<uint16_t>(fin);
-	header.FastFrame = read<uint16_t>(fin);
+	header.LastFrame = read<uint16_t>(fin);
 	header.VectorLen = read<uint16_t>(fin);
 	header.Flags = read<uint16_t>(fin);
 	header.Pivot = read<uint16_t>(fin);
