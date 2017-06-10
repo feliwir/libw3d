@@ -6,6 +6,20 @@
 using namespace w3dview;
 std::map<std::string, std::shared_ptr<Texture>> CompiledModel::s_textures;
 
+
+template<class T>
+std::vector<T> getDataVector(std::vector<uint8_t> data)
+{
+	std::vector<T> result;
+	auto num = data.size() / sizeof(T);
+	for (int i = 0; i<num; ++i)
+	{
+		result.push_back(*(T*)&data[i * sizeof(T)]);
+	}
+
+	return result;
+}
+
 CompiledModel::CompiledModel()
 {
 
@@ -197,15 +211,47 @@ void CompiledModel::ComputePose()
 
 void CompiledModel::Render(Shader& s)
 {
+
+
 	//compute pose with ani
 	if (m_animations.size() > 0)
 	{
+		int i = 0;
+		for (auto f_bone : m_frame_bones)
+		{
+			f_bone = m_bones[i++];
+		}
+
+		//works only for one animation !!!
+		frame = frame % m_animations[0]->Header.NumFrames;
+
 		for (auto channel : m_animations[0]->Channels)
 		{
-			if (channel)
+			int firstFrame = channel->Header.FirstFrame;
+			int lastFrame = channel->Header.LastFrame;
+			if (firstFrame > frame || lastFrame < frame)
+				return;
+
+			glm::mat4 bone;
+			switch (channel->Header.Flags)
+			{
+			case 0:
+				glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3((float)channel->Data[frame - firstFrame], 0.0, 0.0));
+				break;
+			case 1:
+				glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, (float)channel->Data[frame - firstFrame], 0.0));
+				break;
+			case 2:
+				glm::translate(m_frame_bones[channel->Header.Pivot], glm::vec3(0.0, 0.0, (float)channel->Data[frame- -firstFrame]));
+				break;
+			case 3:
+				auto data = getDataVector<glm::vec4>(channel->Data);
+				m_frame_bones[channel->Header.Pivot] *= data[frame - firstFrame];
+				break;
+			}
 		}
 	}
-
+	frame++;
 
 	for (auto& mesh : m_meshes)
 	{
@@ -230,7 +276,14 @@ void CompiledModel::Render(Shader& s)
 		glUniform1i(s.uniform("has_skinning"), mesh.skinned);
 		if (mesh.skinned)
 		{
-			glUniformMatrix4fv(s.uniform("bones"), m_bones.size(), false, glm::value_ptr(m_bones.front()));
+			if (m_animations.size() > 0)
+			{
+				glUniformMatrix4fv(s.uniform("bones"), m_frame_bones.size(), false, glm::value_ptr(m_frame_bones.front()));
+			}
+			else
+			{
+				glUniformMatrix4fv(s.uniform("bones"), m_bones.size(), false, glm::value_ptr(m_bones.front()));
+			}
 		}
 
 		glUniformMatrix4fv(s.uniform("m"), 1, false, glm::value_ptr(model));
@@ -246,3 +299,4 @@ void CompiledModel::Render(Shader& s)
 CompiledModel::Mesh::Mesh() : skinned(false), vbo(0),ibo(0),num(0),pivot(-1)
 {
 }
+

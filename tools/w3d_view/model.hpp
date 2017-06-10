@@ -51,6 +51,7 @@ namespace w3dview
 		std::vector<std::shared_ptr<libw3d::Animation>> m_animations;
 		//precomputed bones for the shader
 		std::vector<glm::mat4> m_bones;
+		std::vector<glm::mat4> m_frame_bones;
 
 		int frame;
 	private:

@@ -128,7 +128,7 @@ void Viewer::SetHeight(const unsigned int height)
 
 bool Viewer::SetAnimation(const std::string& ani)
 {
-
+	return true;
 }
 
 void Viewer::Error(int error, const char* description)
