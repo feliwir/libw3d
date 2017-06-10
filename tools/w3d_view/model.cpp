@@ -220,7 +220,7 @@ void CompiledModel::ComputePose()
 		}
 
 		m_bones.push_back(bone);
-		m_frame_bones.push_back(glm::mat4(1.0));
+		m_frame_bones.push_back(bone);
 	}
 }
 
@@ -254,48 +254,62 @@ void CompiledModel::nextFrame()
 			ani.passed = fmod(ani.passed, ani.delta);
 
 			ani.frame %= ani.animation->Header.NumFrames;
+			std::vector<glm::mat4> rots(m_bones.size());
+			std::vector<glm::vec3> trans(m_bones.size());
 
 			for (auto channel : ani.animation->Channels)
 			{
-				int firstFrame = channel->Header.FirstFrame;
-				int lastFrame = channel->Header.LastFrame;
-				auto& bone = m_frame_bones[channel->Header.Pivot];
+				auto& h =  channel->Header;
+				int firstFrame = h.FirstFrame;
+				int lastFrame = h.LastFrame;
 				int f = ani.frame  - firstFrame -1;
 				f = std::max(0, f);
 				f = std::min(lastFrame - firstFrame -1, f);
 
-				switch (channel->Header.Flags)
+				switch (h.Flags)
 				{
 				case 0:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					bone = glm::translate(bone, glm::vec3(data[f], 0.0, 0.0));
+					trans[h.Pivot] += glm::vec3(data[f], 0.0, 0.0);
 				}
 				break;
 				case 1:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					bone = glm::translate(bone, glm::vec3(0.0, data[f], 0.0));
+					trans[h.Pivot] += glm::vec3(0.0f, data[f], 0.0);
 				}
 				break;
 				case 2:
 				{
 					auto data = getDataVector<float>(channel->Data);
-					bone = glm::translate(bone, glm::vec3(0.0, 0.0, data[f]));
+					trans[h.Pivot] += glm::vec3(0.0f, 0.0, data[f]);
 				}
 				break;
 				case 6:
 				{
-					auto data = getDataVector<glm::quat>(channel->Data);
+					auto data = getDataVector<glm::quat>(channel->Data);			
 					auto raw = data[f];
 					auto quad = glm::quat(raw.w, raw.x, raw.y, raw.z);
 					auto r_mat = glm::toMat4(quad);
-					bone *= r_mat;
+					rots[h.Pivot] = r_mat;
 				}
 				break;
 				}
 			}
+			
+			for(int i=0;i<m_frame_bones.size();++i)
+			{
+				auto& b = m_frame_bones[i];
+				auto p = m_pivots[i];
 
+				while(p.parent>-1)
+				{
+					
+					p = m_pivots[p.parent];
+				}
+
+			}
 		}
 	}
 }
